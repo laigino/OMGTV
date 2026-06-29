@@ -73,16 +73,17 @@ class CacheManager extends EventEmitter {
         }
     }
 
-    saveDatabase() {
+   // Rendi la funzione asincrona
+    async saveDatabase() {
         try {
             const data = this.db.export();
             const buffer = Buffer.from(data);
-            fs.writeFileSync(this.dbPath, buffer);
+            // Usa writeFile invece di writeFileSync
+            await fs.promises.writeFile(this.dbPath, buffer); 
         } catch (error) {
             logger.error(this._sk(), 'Cache database save error:', error);
         }
     }
-
     loadCacheFromDB() {
         try {
             // Carica metadata
@@ -135,7 +136,7 @@ class CacheManager extends EventEmitter {
         }
     }
 
-    saveCacheToDB() {
+   async saveCacheToDB() {
         try {
             // Salva metadata
             if (this.cache.lastUpdated) {
@@ -176,7 +177,7 @@ class CacheManager extends EventEmitter {
                 stmt.free();
             }
 
-            this.saveDatabase();
+            await this.saveDatabase();
             logger.log(this._sk(), 'Cache saved to database');
         } catch (error) {
             logger.error(this._sk(), 'Cache save to database error:', error);
@@ -310,7 +311,7 @@ class CacheManager extends EventEmitter {
             logger.log(this._sk(), 'Channels in cache:', data.channels.length, ', genres:', data.genres.length, ', cache rebuilt');
 
             // Salva nel database
-            this.saveCacheToDB();
+            await this.saveCacheToDB();
 
             this.emit('cacheUpdated', this.cache);
 
